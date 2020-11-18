@@ -16,7 +16,7 @@
 
 import * as fs from 'fs';
 import { UploadHelper } from './upload-helper';
-import { Storage, UploadResponse } from '@google-cloud/storage';
+import { Storage, UploadResponse,DownloadResponse } from '@google-cloud/storage';
 
 /**
  * Available options to create the client.
@@ -66,6 +66,37 @@ export class Client {
     if (idx > -1) {
       bucketName = destination.substring(0, idx);
       prefix = destination.substring(idx + 1);
+    }
+
+    const stat = await fs.promises.stat(path);
+    const uploader = new UploadHelper(this.storage);
+    if (stat.isFile()) {
+      const uploadedFile = await uploader.uploadFile(bucketName, path, prefix);
+      return [uploadedFile];
+    } else {
+      const uploadedFiles = await uploader.uploadDirectory(
+        bucketName,
+        path,
+        prefix,
+      );
+      return uploadedFiles;
+    }
+  }
+  /**
+   * Invokes GCS Helper for downloading file or directory.
+   * @param bucketName Name of bucket to download file/dir.
+   * @param path Path of the file/dir to download.
+   * @param prefix Optional prefix when download to GCS.
+   * @returns List of downloaded file(s).
+   */
+  async download(source: string, path: string): Promise<DownloadResponse[]> {
+    let bucketName = source;
+    let prefix = '';
+    // If destination of the form my-bucket/subfolder get bucket and prefix.
+    const idx = source.indexOf('/');
+    if (idx > -1) {
+      bucketName = source.substring(0, idx);
+      prefix = source.substring(idx + 1);
     }
 
     const stat = await fs.promises.stat(path);

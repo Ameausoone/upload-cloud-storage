@@ -37,3 +37,15 @@ export async function getFiles(
   }
   return fileList;
 }
+
+/**
+ * Return if a path point to Cloud Storage or not.
+ *
+ * @param path The path to check.
+ * @returns true if path is a cloud storage path.
+ */
+export async function isCloudStoragePath(
+  path: string
+): Promise<boolean> {
+  return path.startsWith("gs://")
+}

@@ -19,16 +19,17 @@ import { Client } from './client';
 
 async function run(): Promise<void> {
   try {
-    const path = core.getInput('path', { required: true });
+    const source = core.getInput('source', { required: true });
     const destination = core.getInput('destination', { required: true });
     const serviceAccountKey = core.getInput('credentials');
     const client = new Client({ credentials: serviceAccountKey });
-    const uploadResponses = await client.upload(destination, path);
+    
+    const downloadResponses = await client.download(source, path);
 
     core.setOutput(
-      'uploaded',
-      uploadResponses
-        .map((uploadResponse) => uploadResponse[0].name)
+      'downloaded',
+      downloadResponses
+        .map((downloadResponse) => downloadResponse[0].name)
         .toString(),
     );
   } catch (error) {
